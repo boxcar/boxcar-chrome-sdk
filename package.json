@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "crypto-js": "~3.1.4"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-clean": "^0.3.1",
+    "gulp-concat": "~2.2.0",
+    "gulp-jshint": "^1.10.0",
+    "gulp-resolve-dependencies": "~2.1.0",
+    "gulp-uglify": "~0.2.1"
+  }
+}
