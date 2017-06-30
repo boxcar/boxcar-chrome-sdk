@@ -287,11 +287,15 @@ var __initBoxcar = function(boxcarConfig) {
         }
         return false;
     }
-    
+
     function registered(enabled) {
         localStorage.setItem("registered", enabled ? "true" : "false");
     }
-    
+
+    function getSubscriptionId(pushSubscription) {
+        return pushSubscription.endpoint.split('/').slice(-1)
+    }
+
     function getUDID() {
         // TODO: implement
         return null;
@@ -339,7 +343,7 @@ var __initBoxcar = function(boxcarConfig) {
     function subscribeGCM() {
         var workerPromise = navigator.serviceWorker.ready;
         return workerPromise.then(function(serviceWorkerRegistration) {
-            return serviceWorkerRegistration.pushManager.subscribe().then(
+            return serviceWorkerRegistration.pushManager.subscribe({userVisibleOnly: true}).then(
                 function(subscription) {
                     return subscription;
                 }).catch(function(e) {
@@ -440,7 +444,7 @@ var __initBoxcar = function(boxcarConfig) {
                 boxcarConfig.getAppVersion(),
                 boxcarConfig.getOSVersion(),
                 ttlSecs,senderIdHash);
-        
+
         return navigator.serviceWorker
             .register(boxcarConfig.getServiceWorker())
             .then(checkPushSupported)
@@ -455,7 +459,7 @@ var __initBoxcar = function(boxcarConfig) {
                   }
             )
             .then(function(subscription) {
-                var token = subscription.subscriptionId;
+                var token = getSubscriptionId(subscription);
                 if (!!isRegistered()) {
                     boxcarConfig.console().debug("Already registered. Skip registration.");
                     return Promise.resolve();
@@ -474,7 +478,7 @@ var __initBoxcar = function(boxcarConfig) {
     function unsubscribe() {
         return readToken().then(
             function(pushSubscription){
-                var subscriptionId = pushSubscription.subscriptionId;
+                var subscriptionId = getSubscriptionId(pushSubscription);
                 // We have a subcription, so call unsubscribe on it
                 return pushSubscription.unsubscribe().then(function(successful) {
                     registered(false);
@@ -500,7 +504,7 @@ var __initBoxcar = function(boxcarConfig) {
     function ping() {
         return readToken().then(
             function(pushSubscription) {
-                var subscriptionId = pushSubscription.subscriptionId;
+                var subscriptionId = getSubscriptionId(pushSubscription);
                 // call ping
                 return pingBoxcar(subscriptionId);
         }).catch(function(err) {
@@ -511,7 +515,7 @@ var __initBoxcar = function(boxcarConfig) {
     function track(notificationId) {
         return readToken().then(
             function(pushSubscription) {
-                var subscriptionId = pushSubscription.subscriptionId;
+                var subscriptionId = getSubscriptionId(pushSubscription);
                 // call ping
                 return trackNotificationBoxcar(subscriptionId, notificationId);
         }).catch(function(err) {
